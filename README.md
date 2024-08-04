@@ -1,3 +1,3 @@
-# pantry-tracker
+# inventory-tracker
 
-A robotic pantry tracking system utilizing camera-based classification technology
+A robotic inventory tracking system utilizing camera-based classification technology
