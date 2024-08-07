@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Box, Typography, Button, TextField, Paper } from "@mui/material";
 import { db } from "./firebase";
 import {
@@ -12,13 +12,32 @@ import {
   deleteDoc,
   getDoc,
 } from "firebase/firestore";
+import { Camera } from "react-camera-pro";
 import { toast, ToastContainer } from "react-toastify";
+import FlipCameraIosIcon from "@mui/icons-material/FlipCameraIos";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Home() {
   const [inventory, setInventory] = useState([]);
   const [open, setOpen] = useState(false);
   const [item, setItem] = useState({ name: "", quantity: 0 });
+  const [search, setSearch] = useState("");
+
+  // LLM detection
+  const getAIGeneratedInventory = async () => {
+    try {
+      const response = await fetch("/api/openai");
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleAIClick = async () => {
+    await getAIGeneratedInventory();
+  };
 
   // Add item
   const addItem = async (item, amount) => {
@@ -58,10 +77,22 @@ export default function Home() {
     const docs = await getDocs(snapshot);
     const inventoryList = [];
     docs.forEach((doc) => {
-      inventoryList.push({ name: doc.id, ...doc.data() });
+      if (search !== "") {
+        if (doc.id.toLowerCase().includes(search.toLowerCase())) {
+          inventoryList.push({ name: doc.id, ...doc.data() });
+        }
+      } else {
+        inventoryList.push({ name: doc.id, ...doc.data() });
+      }
     });
     setInventory(inventoryList);
   };
+
+  // Camera
+  const camera = useRef(null);
+  const [image, setImage] = useState(null);
+  const [cameraOn, setCameraOn] = useState(false);
+  const [facingMode, setFacingMode] = useState("environment");
 
   // Update inventory when the page loads
   useEffect(() => {
@@ -71,7 +102,7 @@ export default function Home() {
   return (
     <>
       <ToastContainer />
-
+      <Button onClick={handleAIClick}>Hi</Button>
       <Box
         sx={{
           display: "flex",
@@ -84,6 +115,48 @@ export default function Home() {
         <Typography variant="h1" sx={{ mb: 4 }}>
           Inventory Manager
         </Typography>
+        <Button
+          onClick={() => {
+            setCameraOn((cameraOn) => !cameraOn);
+          }}
+        >
+          Toggle AI Camera
+        </Button>
+        {cameraOn ? (
+          <>
+            <Box
+              sx={{
+                position: "relative",
+                width: 500,
+                height: 350,
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                overflow: "hidden",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#000",
+              }}
+            >
+              <Camera ref={camera} />
+            </Box>
+            <Box sx={{ marginBottom: 2 }}>
+              <Button
+                onClick={() =>
+                  setFacingMode((prevMode) =>
+                    prevMode === "environment" ? "user" : "environment"
+                  )
+                }
+              >
+                <FlipCameraIosIcon />
+              </Button>
+              <Button onClick={() => setImage(camera.current.takePhoto())}>
+                <CameraAltIcon />
+              </Button>
+            </Box>
+          </>
+        ) : null}
+
         <Box
           sx={{ bgcolor: "slate", display: "flex", flexDirection: "column" }}
         >
@@ -149,6 +222,17 @@ export default function Home() {
             elevation={3}
             sx={{ padding: 2, maxWidth: 600, width: "100%" }}
           >
+            <TextField
+              variant="filled"
+              label="Search"
+              type="text"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                updateInventory();
+              }}
+              sx={{ width: "100%", marginBottom: 2 }}
+            />
             {inventory.length <= 0 ? (
               <Typography variant="h6" sx={{ color: "gray" }}>
                 Empty
