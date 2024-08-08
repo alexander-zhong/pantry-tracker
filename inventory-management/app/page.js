@@ -24,21 +24,6 @@ export default function Home() {
   const [item, setItem] = useState({ name: "", quantity: 0 });
   const [search, setSearch] = useState("");
 
-  // LLM detection
-  const getAIGeneratedInventory = async () => {
-    try {
-      const response = await fetch("/api/openai");
-      const data = await response.json();
-      console.log(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleAIClick = async () => {
-    await getAIGeneratedInventory();
-  };
-
   // Add item
   const addItem = async (item, amount) => {
     const docRef = doc(collection(db, "inventory"), item.name);
@@ -94,6 +79,30 @@ export default function Home() {
   const [cameraOn, setCameraOn] = useState(false);
   const [facingMode, setFacingMode] = useState("environment");
 
+  const handleSubmitPhoto = async () => {
+    try {
+      const photoDataUrl = camera.current.takePhoto();
+
+      const payload = {
+        image: photoDataUrl,
+      };
+
+      const response = await fetch("/api/openai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error(error);
+      toast.error("Error submitting photo");
+    }
+  };
+
   // Update inventory when the page loads
   useEffect(() => {
     updateInventory();
@@ -102,7 +111,6 @@ export default function Home() {
   return (
     <>
       <ToastContainer />
-      <Button onClick={handleAIClick}>Hi</Button>
       <Box
         sx={{
           display: "flex",
@@ -120,7 +128,7 @@ export default function Home() {
             setCameraOn((cameraOn) => !cameraOn);
           }}
         >
-          Toggle AI Camera
+          Toggle AI Camera (Deactivated for this demo due to api rate)
         </Button>
         {cameraOn ? (
           <>
@@ -150,7 +158,8 @@ export default function Home() {
               >
                 <FlipCameraIosIcon />
               </Button>
-              <Button onClick={() => setImage(camera.current.takePhoto())}>
+              <Button>
+                {"/* onClick={handleSubmitPhoto} */ "}
                 <CameraAltIcon />
               </Button>
             </Box>
