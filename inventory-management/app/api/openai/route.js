@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
-import { FsReadStream } from "openai/_shims/auto/types";
+
 import fs from "fs";
 
 const fileManager = new GoogleAIFileManager(process.env.AIKEY);
