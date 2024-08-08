@@ -123,6 +123,9 @@ export default function Home() {
         <Typography variant="h1" sx={{ mb: 4 }}>
           Inventory Manager
         </Typography>
+        <Typography variant="body1">
+          Disclaimer: This demo list is global to every that access the site
+        </Typography>
         <Button
           onClick={() => {
             setCameraOn((cameraOn) => !cameraOn);
