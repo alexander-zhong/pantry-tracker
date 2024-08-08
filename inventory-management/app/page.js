@@ -128,7 +128,7 @@ export default function Home() {
             setCameraOn((cameraOn) => !cameraOn);
           }}
         >
-          Toggle AI Camera (Deactivated for this demo due to api rate)
+          Toggle AI Camera (Deactivated for this demo)
         </Button>
         {cameraOn ? (
           <>
@@ -159,7 +159,6 @@ export default function Home() {
                 <FlipCameraIosIcon />
               </Button>
               <Button>
-                {"/* onClick={handleSubmitPhoto} */ "}
                 <CameraAltIcon />
               </Button>
             </Box>

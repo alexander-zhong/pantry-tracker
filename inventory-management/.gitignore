@@ -36,5 +36,4 @@ app/.env
 *.tsbuildinfo
 next-env.d.ts
  
-# firebase file
-app/firebase.js
+
